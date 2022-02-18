@@ -14,10 +14,14 @@ try:
     ai_info = ai_device.get_info()
 
     # Read and display voltage values for all analog input channels
-    for channel in range(ai_info.get_num_chans()):
-        data = ai_device.a_in(channel, AiInputMode.SINGLE_ENDED,
+    while True:
+        x = input('Anything')
+        if x:
+            break
+        for channel in range(ai_info.get_num_chans()):
+            data = ai_device.a_in(channel, AiInputMode.SINGLE_ENDED,
                               Range.BIP10VOLTS, AInFlag.DEFAULT)
-        print('Channel', channel, 'Data:', data)
+            print('Channel', channel, 'Data:', data)
 
     daq_device.disconnect()
     daq_device.release()
