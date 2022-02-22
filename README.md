@@ -19,4 +19,7 @@ sudo chmod 777 /dev/USBNAME
 So looking at teh servo motor and talking with galagher, the motor might be too slow to use. i can see how fast i can get it but it might just not work for our prouposus
 He didnt seem too mad at me but mad at himself for not checking my work but i do still feel fuly resposnable
 
-    
+-- downloading dotnet to test the daq software if applicable. https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+
+
+For the to Forces.py, needed to install pandas, conda install pandas
