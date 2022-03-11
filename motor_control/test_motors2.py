@@ -1,12 +1,9 @@
 #import dynamixel_sdk as dynamixel
 # from curses import baudrate
-from time import sleep
+from time import sleep, time
 from dynamixel_sdk import *
 from serial import SerialException
 import os
-from math import radians, sin
-import matplotlib.pyplot as plt
-from numpy import array
 
 def main():
     device_name = '/dev/ttyUSB0'
@@ -20,15 +17,14 @@ def main():
     tourque_disable = 0
     tourque_enable_id = 64
     control_id = 11
-    velocity_enable = 1
     position_enable = 3
     position_id = 116
-
-    present_position_id = 132
-
-    velocity_id = 104
-    velocity_limit_id = 44
-    velocity_limit = 1311 #this is for ~300rev/min
+    # velocity_limit = 1311 #this is for ~300rev/min
+    dynamxel_velocity_conversion = lambda velocity : int(velocity*4.366797)
+    dynamxel_acceleration_converstion = lambda acceleration: int(acceleration*214.577)
+    velocity = lambda flaps_ps : (float(flaps_ps*60.0))
+    accelleration = lambda flaps_ps, max_velocity : (float((360.0*flaps_ps))*max_velocity)
+    velocity_limit = 300.0
 
     ph = PacketHandler(protocol)
     
@@ -69,82 +65,61 @@ def main():
     sleep(1)
     #position control is not a great idea for this setup because it tries to move to poaint A to point B as fast as it can
     #velocity control is a better bet
-    ph.write4ByteTxRx(port_num, dynamxel_id, velocity_limit_id, velocity_limit)
-    ph.write1ByteTxRx(port_num, dynamxel_id, control_id, velocity_enable)
+
+    # for this is going to be a a profile of the max points of the position with a wait until done script completed to do the next rotationb back
+    # https://emanual.robotis.com/docs/en/dxl/x/xl330-m077/#profile-acceleration
+
+
+
+    # this will be done by setting profile velocity and then setting the acceleratiion.
+    # acceleration depends on the fime per flap needed or how many flaps per second there is
+    # max_position = {"id": 48 , "value": 3073 }
+    # min_position = {"id": 52 , "value": 1023 }
+    # ph.write4ByteTxRx(port_num, dynamxel_id, max_position["id"], max_position["value"])
+    # ph.write4ByteTxRx(port_num, dynamxel_id, min_position["id"], min_position["value"])
+
+
+
+    # ph.write4ByteTxRx(port_num, dynamxel_id, velocity_limit_id, velocity_limit)
+    # ph.write1ByteTxRx(port_num, dynamxel_id, control_id, velocity_enable)
     ph.write1ByteTxRx(port_num, dynamxel_id, tourque_enable_id, tourque_enable)
     if ph.read1ByteTxRx(port_num, dynamxel_id, tourque_enable_id)[0] != 1: #comm sucess is 0
         print('reseting tourque failed')
         return 0
 
-    myflaps_ps = 6
-    flaps = 10
-    velocity = lambda flaps_ps : (float(flaps_ps*60.0))
+    myflaps_ps = 1
+    number_of_flaps = 10
+    
     #max velocity i have been using is 300 rev/min. we can crank this up as we go but for right now
     #aslo ned to figure out how to incorperate
-    accelleration = lambda flaps_ps, max_velocity : (float(1.0/(360.0*flaps_ps))*max_velocity)
-    ph.write4ByteTxRx(port_num, dynamxel_id, velocity_id, int(-velocity(myflaps_ps)))
-    while flaps > 0:
-        if(ph.read4ByteTxRx(port_num, dynamxel_id, present_position_id)[0] >= max_pos):
-            ph.write4ByteTxRx(port_num, dynamxel_id, velocity_id, int(-velocity(myflaps_ps)))
-            flaps -= 1
-        elif(ph.read4ByteTxRx(port_num, dynamxel_id, present_position_id)[0] <= min_pos):
-            ph.write4ByteTxRx(port_num, dynamxel_id, velocity_id, int(velocity(myflaps_ps)))
 
-    # exit()
+    myvelocity = velocity(myflaps_ps)
+    if(myvelocity > velocity_limit):
+        myvelocity = velocity_limit
+    myacceleration = accelleration(myflaps_ps, myvelocity)
+    velocity_profile = {"id": 112, "value": dynamxel_velocity_conversion(myvelocity)}
+    accelleration_profile = {"id": 108, "value": dynamxel_acceleration_converstion(myvelocity)}
+
+    print("Velocity : ", myvelocity)
+    print("Accelleration : ", myacceleration)
+
+    ph.write4ByteTxRx(port_num, dynamxel_id, velocity_profile["id"], velocity_profile["value"])
+    ph.write4ByteTxRx(port_num, dynamxel_id, accelleration_profile["id"], accelleration_profile["value"])
     
-    # myplot = []
-    # myplot2 = []
-    # mystep = 90
-    # print("min_pos: " + str(min_pos) + " max_pos: " + str(max_pos))
-    # position = lambda index : (float((max_pos - min_pos) + (min_pos * sin(radians(index)))))
-    # derivative = lambda index : (float(myplot[index]) - float(myplot[index-1])) # velocity function is not really used that well and somthing seems fishy
+    # control code for flapping here
+    position_control = {"id": 116, "max_value": 3073, "min_value": 1023}
+    monitor_position_control = {"id": 132}
+    start_time = time.time()
+    while number_of_flaps > 0:
+        ph.write4ByteTxRx(port_num, dynamxel_id, position_control["id"], position_control["min_value"])
+        while (ph.read4ByteTxRx(port_num, dynamxel_id, monitor_position_control["id"])[0] - position_control["min_value"]) >= 12:
+            pass
+        ph.write4ByteTxRx(port_num, dynamxel_id, position_control["id"], position_control["max_value"])
+        while (position_control["max_value"] - ph.read4ByteTxRx(port_num, dynamxel_id, monitor_position_control["id"])[0]) >= 12:
+            pass
+        number_of_flaps -= 1
 
-    # #velocity will increase as sample points decrease
-
-    # periods = 3
-    # count = 0
-    # for period in range(0, periods, 1):
-    #     for i in range(90, 270, mystep):
-    #         sinfunct = position(i)
-    #         myplot.append(sinfunct)
-    #         if i == 90 and period == 0:
-    #             myplot2.append(0)
-    #         else:
-    #             myplot2.append(derivative(count))
-    #         count += 1
-            
-    #     for i in range(270, 90, (-1)*mystep):
-    #         sinfunct = position(i)
-    #         myplot.append(sinfunct)
-    #         myplot2.append(derivative(count))
-    #         count += 1
-
-    # time = []
-    # flaps_ps = 0.25
-    # time_funct = lambda index : float(index*mystep/(flaps_ps*60.0*6))
-    # for i in range(len(myplot)):
-    #     time.append(time_funct(i))
-
-    # xpoints = array(time)
-    # ypoints_pos = array(myplot)
-    # ypoints_der = array(myplot2)
-
-    # plt.subplot(1,2,1, title='position')
-    # plt.plot(xpoints, ypoints_pos, color='r')
-    # plt.subplot(1,2,2, title='velocity')
-    # plt.plot(xpoints, ypoints_der, color='b')
-    # plt.show()
-
-    
-
-    # # print(time[1])
-    # # i might have to use velocity control since that has some variation on time
-    # # the time to sleep needs to be fixed to produce an accurate flaps per second or make it as efficent as possible
-    # for pos in myplot2:
-    #     # print(int(pos))
-        
-    #     ph.write4ByteTxRx(port_num, dynamxel_id, velocity_id, int(pos))
-    #     sleep(time[1])
+    print(time.time() - start_time)
     ph.write1ByteTxRx(port_num, dynamxel_id, tourque_enable_id, tourque_disable)
     ph.write1ByteTxRx(port_num, dynamxel_id, control_id, position_enable) #this enables position control
     ph.write1ByteTxRx(port_num, dynamxel_id, tourque_enable_id, tourque_enable)
