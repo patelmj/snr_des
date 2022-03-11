@@ -4,8 +4,9 @@ from uldaq import (get_daq_device_inventory, DaqDevice, InterfaceType, AiInputMo
 import csv
 from time import time,sleep
 import numpy as np
-import pandas as pd
-import threading
+#import pandas as pd
+import matplotlib.pyplot as plt
+#import threading
 
 #Seconds parameter to figure out how long to collect data for
 seconds = 5
@@ -31,10 +32,10 @@ try:
         ct = (time()-starttime)*1000 #ct is in Milliseconds
         info_row.append(ct)
 
-        for channel in range(ai_info.get_num_chans()):
+        for channel in range(ai_info.get_num_chans()): #changing it to range(6) works? I think- Mugi
             data = ai_device.a_in(channel, AiInputMode.SINGLE_ENDED, Range.BIP10VOLTS, AInFlag.DEFAULT)
             if channel >5: #Channels that have our data, 0,1,2,3,4,5,6, based off Kevin and Mugi's Analysis
-                continue
+                break
             info_row.append(data)
             #print('Channel', channel, 'Data:', data)
         overall.append(info_row)
@@ -64,7 +65,7 @@ try:
     #overall=np.array(overall)
     time = np.array(overall)[:,0]
     #print(time)
-    overall = np.subtract(np.delete(overall,0,1),bias)#Fix I droped the time column
+    overall = np.subtract(np.delete(overall,0,1),bias)#Fix I dropped the time column
     overall = np.array(overall)
     overall = np.matmul(conversion_matrix,overall.transpose()).transpose()
     
@@ -82,7 +83,7 @@ except ULException as e:
     print('\n', e)  # Display any error messages
 
 
-import matplotlib.pyplot as plt
+
 figure, axis = plt.subplots(2,1)
 
 fx = overall[:,0]
