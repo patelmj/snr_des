@@ -3,6 +3,8 @@ from math import sin, radians
 from numpy import array
 import matplotlib.pyplot as plt
 
+#do not use, this is the old way of doing thing and is outdated
+
 myplot = []
 myplot2 = []
 mystep = 5
