@@ -55,10 +55,9 @@ def motor_init(flaps_ps):
     else:
         print('BaudRate could not be set')
         return 0
-
     ph.write1ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['control']['id'], INPUT_TABLE['control']['position']) #this enables position control
     ph.write1ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['tourque']['id'], INPUT_TABLE['tourque']['enable'])
-    if ph.read1ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['tourque']['enable'])[0] != 1: #comm sucess is 0
+    if ph.read1ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['tourque']['id'])[0] != 1: #comm sucess is 0
         print('setting tourque failed')
         return 0
     else:
@@ -94,16 +93,17 @@ def motor_init(flaps_ps):
 
 def motor_main(ph, port_num, number_of_flaps):
     # control code for flapping here
+
     start_time = time.time()
     while number_of_flaps > 0:
         ph.write4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position']['id'], INPUT_TABLE['position']['min_value'])
-        while (ph.read4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position_monitor']['id'])[0] - INPUT_TABLE['position']['min_value']) >= 12:
+        while (ph.read4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position_monitor']['id'])[0] - INPUT_TABLE['position']['min_value']) >= 20:
             pass
         ph.write4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position']['id'], INPUT_TABLE['position']['max_value'])
-        while (INPUT_TABLE['position']['max_value'] - ph.read4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position_monitor']['id'])[0]) >= 12:
+        while (INPUT_TABLE['position']['max_value'] - ph.read4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position_monitor']['id'])[0]) >= 20:
             pass
         number_of_flaps -= 1
-    return time.time() - start_time
+    return (time.time() - start_time)
 
 def motor_exit(ph, port_num):
     ph.write4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['position']['id'], INPUT_TABLE['position']['mid_value'])
@@ -121,9 +121,10 @@ def motor_exit(ph, port_num):
 if __name__ == '__main__':
     flaps_ps = 1
     number_of_flaps = 10
-    control = init(flaps_ps)
+    control = motor_init(flaps_ps)
+#    print(control)
 
     #there are going to be two functions here for the paralization
     #init runner and exit
-    main(control[0], control[1], number_of_flaps)
-    exit(control[0], control[1])
+    motor_main(control[0], control[1], number_of_flaps)
+    motor_exit(control[0], control[1])

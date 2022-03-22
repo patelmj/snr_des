@@ -34,14 +34,15 @@ def motors(control, flap_num):
     # this will flap the wing to the specified flap num and flaps ps set in the motor_init
     # this will also print how many times it would take to flap the wing
 
+
 if __name__ == '__main__':
 
     #Do Init stuff
     #FIXME add Motor INIT stuff here
-    flaps_ps = 4
-    flap_num = 15
-    error = 0.5 # error is 5 seconds since i dont think it would be exactly what the fps is 
-    runtime = (1/flaps_ps * flap_num) + error
+    flaps_ps = 1
+    flap_num = 10
+    error = 5 # error is 5 seconds since i dont think it would be exactly what the fps is 
+    runtime = (flaps_ps * flap_num) + error
     control = motor_init(flaps_ps)
 
     #Daq Init work
@@ -60,8 +61,9 @@ if __name__ == '__main__':
 
     data = load_cell_thread.get()
     motor_data = motor_thread.get()
-    #print('Total time taken by motor: %d s' % motor_data)
+    print('Total time taken by motor: %d s' % motor_data)
     motor_exit(control[0], control[1])
     data_time,data = convertToForces(data,bias)
     graphing(data_time,data)
     printOutCSV(data_time,data,"./para_forces.csv")
+
