@@ -38,8 +38,8 @@ def motors(control, flap_num):
 if __name__ == '__main__':
 
     #Do Init stuff
-    save_file_name="actual_10ms_data_collection.csv"
-    step_ms=10 #5 is the lowest it will go
+    save_file_name="fake_wing_10ms_data.csv"
+    step_ms=10 #5 is the lowest it will go, keep it at 10ms so that the computer can keep up
     #FIXME add Motor INIT stuff here
     flaps_ps = 4.5
     flap_num = 15
