@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import pandas as pd
 
+#a test script to convert the signal data to forces 
 data = pd.read_csv('test.csv')
 print(data)
 

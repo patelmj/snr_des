@@ -3,6 +3,8 @@ from multiprocessing.pool import ThreadPool
 from time import time, sleep
 
 from functs import *
+## In this code the mass of whatever is on top of the device is accounted for in the calibration step
+
 
 def dataCollection(start,seconds):
     overall=[]
@@ -11,12 +13,9 @@ def dataCollection(start,seconds):
         ct = (time()-start)*1000 #ct is in Milliseconds
         info_row.append(ct)
         for channel in range(6):
-            data = ai_device.a_in(channel, AiInputMode.SINGLE_ENDED, Range.BIP10VOLTS, AInFlag.DEFAULT)
-            info_row.append(data)
-            #print('Channel', channel, 'Data:', data)
-        overall.append(info_row) **self._kwargs)
-#     def join(self, *args):
-#         Thread.join(self, *args)000)
+            data = ai_device.a_in(chandata_collection 'Data:', data)
+        overall.append(info_row)
+
     return overall
 
 def motors(start,seconds):

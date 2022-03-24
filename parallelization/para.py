@@ -38,7 +38,8 @@ def motors(control, flap_num):
 if __name__ == '__main__':
 
     #Do Init stuff
-    step_ms=5 #5 is the lowest it will go
+    save_file_name="actual_10ms_data_collection.csv"
+    step_ms=10 #5 is the lowest it will go
     #FIXME add Motor INIT stuff here
     flaps_ps = 4.5
     flap_num = 15
@@ -67,4 +68,4 @@ if __name__ == '__main__':
     motor_exit(control[0], control[1])
     data_time,data = convertToForces(data,bias)
     graphing(data_time,data)
-    printOutCSV(data_time,data,"./para_forces.csv")
+    printOutCSV(data_time,data,save_file_name)

@@ -8,6 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 #import threading
 
+##in this code the weight of the stuff on top of the device is not accounted for and so the force of gravity is show in the data
+
 #Seconds parameter to figure out how long to collect data for
 seconds = 5
 
@@ -63,7 +65,7 @@ try:
     
     print(overall)
     out = np.concatenate((time[:,np.newaxis],overall),axis=1)
-    with open("./test.csv",'w') as file:
+    with open("./weight_force.csv",'w') as file:
         writer = csv.writer(file)
         writer.writerow(file_header)
         writer.writerows(out)
