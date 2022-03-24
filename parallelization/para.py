@@ -5,7 +5,7 @@ from time import time, sleep
 from functs import *
 from motor_control import motor_init, motor_main, motor_exit
 
-def dataCollection(start,seconds):
+def dataCollection(start,seconds,ms_step):
     overall=[]
     while time()-start<seconds:
         info_row = []
@@ -17,7 +17,8 @@ def dataCollection(start,seconds):
             #print('Channel', channel, 'Data:', data)
         overall.append(info_row)
         #.01 = 10 miliseconds
-        sleep((10-((time()-starttime)*1000)%10)/1000)
+        ms_interval = ms_step #this value must be in miliseconds, it is the step size in the data collection
+        sleep((ms_interval-((time()-starttime)*1000)%ms_interval)/1000)
     return overall
 
 def motors(control, flap_num):
@@ -37,10 +38,11 @@ def motors(control, flap_num):
 if __name__ == '__main__':
 
     #Do Init stuff
+    step_ms=5 #5 is the lowest it will go
     #FIXME add Motor INIT stuff here
-    flaps_ps = 4
+    flaps_ps = 4.5
     flap_num = 15
-    error = 0.5 # error is 5 seconds since i dont think it would be exactly what the fps is 
+    error = 4 # error is 5 seconds since i dont think it would be exactly what the fps is 
     runtime = (1/flaps_ps * flap_num) + error
     control = motor_init(flaps_ps)
 
@@ -55,12 +57,13 @@ if __name__ == '__main__':
     
     pool = ThreadPool(processes=2) #FIXME check if it is correct to set it up like this
     starttime = time()
-    load_cell_thread = pool.apply_async(dataCollection,(starttime,runtime))
+    load_cell_thread = pool.apply_async(dataCollection,(starttime,runtime,step_ms))
     motor_thread = pool.apply_async(motors,(control, flap_num))
 
     data = load_cell_thread.get()
     motor_data = motor_thread.get()
-    #print('Total time taken by motor: %d s' % motor_data)
+    print('Total time taken by motor: %f s' % motor_data)
+    print('Flaps per second: %f ' % (flap_num/motor_data))
     motor_exit(control[0], control[1])
     data_time,data = convertToForces(data,bias)
     graphing(data_time,data)

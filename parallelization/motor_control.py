@@ -13,7 +13,7 @@ INPUT_TABLE = {
     'protocol': 2,
     'tourque': {'id': 64,'enable': 1,'disable': 0},
     'control': {'id': 11,'position': 3},
-    'position':{'id': 116,'max_value': 3073,'min_value': 1023,'mid_value': 2050},
+    'position':{'id': 116,'max_value': 3073,'min_value': 1023,'mid_value': 2048},
     'velocity_profile': {'id': 112,'value': 0},
     'acceleration_profile': {"id": 108, "value": 0},
     'position_monitor': {'id': 132}
@@ -21,6 +21,9 @@ INPUT_TABLE = {
 
 # Try to avoid changing this, the motor could overvolt and test would fail
 VELOCITY_LIMIT = 300.0
+
+# an issue i am seeing is that it is really not the velocity that we need to get the job done which leads me to beleive that the velocity is not correct
+# with the points that are set
 
 def motor_init(flaps_ps):
     port_num = PortHandler(DEVICE_NAME)
@@ -30,7 +33,7 @@ def motor_init(flaps_ps):
     # max baudrate is 4.5Mbps
     # velocity_limit = 1311 #this is for ~300rev/min
     dynamxel_velocity_conversion = lambda velocity : int(velocity*4.366797)
-    dynamxel_acceleration_converstion = lambda acceleration: int(acceleration*214.577)
+    dynamxel_acceleration_converstion = lambda acceleration: int(acceleration/214.577)
     velocity = lambda flaps_ps : (float(flaps_ps*60.0))
     acceleration = lambda flaps_ps, max_velocity : (float((360.0*flaps_ps))*max_velocity)
 
@@ -78,13 +81,24 @@ def motor_init(flaps_ps):
 
     myvelocity = velocity(myflaps_ps)
     if(myvelocity > VELOCITY_LIMIT):
+        # theroetical flapsps for max velocity is around 4.5 fps for 270r/min
+        # to get somthing hirger than this we need to edit positional data
+
+        # (270/60)*(1/fps)
+        INPUT_TABLE['position']['max_value'] = INPUT_TABLE['position']['max_value'] - int(INPUT_TABLE['position']['min_value']*(VELOCITY_LIMIT/60)/flaps_ps)
+        INPUT_TABLE['position']['min_value'] = INPUT_TABLE['position']['min_value'] + int(INPUT_TABLE['position']['min_value']*(VELOCITY_LIMIT/60)/flaps_ps)
+        
         myvelocity = VELOCITY_LIMIT
+        # if this is over the velocity limit then the bounds of max and min position should be changed
+        # this should be done here
+        
+
     myacceleration = acceleration(myflaps_ps, myvelocity)
     INPUT_TABLE['velocity_profile']['value'] = dynamxel_velocity_conversion(myvelocity)
     INPUT_TABLE['acceleration_profile']['value'] = dynamxel_acceleration_converstion(myacceleration) #FIXME make sure this is right
 
     print("Velocity : ", myvelocity)
-    print("Accelleration : ", myacceleration)
+    print("Accelleration : ", myacceleration )
 
     ph.write4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['velocity_profile']['id'], INPUT_TABLE['velocity_profile']['value'])
     ph.write4ByteTxRx(port_num, INPUT_TABLE['id'], INPUT_TABLE['acceleration_profile']['id'], INPUT_TABLE['acceleration_profile']['value'])
@@ -119,12 +133,17 @@ def motor_exit(ph, port_num):
     port_num.closePort()
 
 if __name__ == '__main__':
-    flaps_ps = 1
+    flaps_ps = 5
     number_of_flaps = 10
     control = motor_init(flaps_ps)
 #    print(control)
 
     #there are going to be two functions here for the paralization
     #init runner and exit
-    motor_main(control[0], control[1], number_of_flaps)
+
+    motor_data = motor_main(control[0], control[1], number_of_flaps)
+
+    print('Total time taken by motor: %f s' % motor_data)
+    print('Flaps per second: %f ' % (number_of_flaps/motor_data))
+
     motor_exit(control[0], control[1])

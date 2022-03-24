@@ -14,9 +14,9 @@ def dataCollection(start,seconds):
             data = ai_device.a_in(channel, AiInputMode.SINGLE_ENDED, Range.BIP10VOLTS, AInFlag.DEFAULT)
             info_row.append(data)
             #print('Channel', channel, 'Data:', data)
-        overall.append(info_row)
-        #.01 = 10 miliseconds
-        sleep((10-((time()-starttime)*1000)%10)/1000)
+        overall.append(info_row) **self._kwargs)
+#     def join(self, *args):
+#         Thread.join(self, *args)000)
     return overall
 
 def motors(start,seconds):
@@ -25,22 +25,6 @@ def motors(start,seconds):
 
     print("Hither I do Fancy Motor Stuffffffff")
     sleep((10-((time()-starttime)*1000)%10)/1000)
-
-# class ThreadWithReturnValue(Thread):
-#     def __init__(self, group=None, target=None, name=None,
-#                  args=(), kwargs={}, Verbose=None):
-#         Thread.__init__(self, group, target, name, args, kwargs)
-#         self._return = None
-#     def run(self):
-#         print(type(self._target))
-#         if self._target is not None:
-#             self._return = self._target(*self._args,
-#                                                 **self._kwargs)
-#     def join(self, *args):
-#         Thread.join(self, *args)
-#         return self._return
-
-
 
 
 if __name__ == '__main__':
@@ -64,16 +48,4 @@ if __name__ == '__main__':
     data = load_cell_thread.get()
     data_time,data = convertToForces(data,bias)
     graphing(data_time,data)
-    printOutCSV(data_time,data,"./para_forces.csv")
-
-    #print(data)
-
-    # load_cell_thread = ThreadWithReturnValue(target = dataCollection(starttime,bias,runtime))
-    # #motor_thread = Thread(target = motors(starttime,runtime))
-    # load_cell_thread.start()
-    # #motor_thread.start()
-    # data = load_cell_thread.join()
-
-    #Closing Arguments
-    #Make this a function?
-    #Write out the daq
+    printOutCSV(data_time,data,"./with_calibration_step.csv")
