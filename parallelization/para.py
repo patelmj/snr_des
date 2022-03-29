@@ -38,11 +38,11 @@ def motors(control, flap_num):
 if __name__ == '__main__':
 
     #Do Init stuff
-    save_file_name="huh.csv"
+    save_file_name="20sectest.csv"
     step_ms=10 #5 is the lowest it will go, keep it at 10ms so that the computer can keep up
     #FIXME add Motor INIT stuff here
     flaps_ps = 4.5
-    flap_num = 15
+    flap_num = 150
     error = 4 # error is 5 seconds since i dont think it would be exactly what the fps is 
     runtime = (1/flaps_ps * flap_num) + error
     control = motor_init(flaps_ps)
