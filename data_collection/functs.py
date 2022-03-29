@@ -39,7 +39,7 @@ def convertToForces(data,bias):
     data = np.matmul(conversion_matrix,data.transpose()).transpose()
     return time,data
 
-def graphing(time,data):
+def graphing(time,data,filename):
     figure, axis = plt.subplots(2,1)
     fx = data[:,0]
     fy = data[:,1]
@@ -55,7 +55,7 @@ def graphing(time,data):
     axis[1].plot(time,ty,label = "Ty")
     axis[1].plot(time,tz,label = "Tz")
     axis[1].legend()
-    plt.show()
+    plt.savefig(filename)
 
 
 def printOutCSV(time,data,filename):

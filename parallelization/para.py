@@ -1,7 +1,8 @@
 #from threading import Thread
 from multiprocessing.pool import ThreadPool
 from time import time, sleep
-
+import sys
+sys.path.insert(1,"../data_collection")
 from functs import *
 from motor_control import motor_init, motor_main, motor_exit
 
@@ -38,11 +39,16 @@ def motors(control, flap_num):
 if __name__ == '__main__':
 
     #Do Init stuff
-    save_file_name="20sectest.csv"
+    try:
+        save_file_name = sys.argv[1]
+    except:
+        save_file_name = input("Please Give me a File Name for Saving the Data: ")
+        save_file_name = "../data/"+save_file_name
+    print(save_file_name)
     step_ms=10 #5 is the lowest it will go, keep it at 10ms so that the computer can keep up
     #FIXME add Motor INIT stuff here
     flaps_ps = 4.5
-    flap_num = 150
+    flap_num = 1300   #15 flaps is about 2.5 seconds, 150 is about 35 seconds, 1300, 8.5 min
     error = 4 # error is 5 seconds since i dont think it would be exactly what the fps is 
     runtime = (1/flaps_ps * flap_num) + error
     control = motor_init(flaps_ps)
@@ -67,5 +73,5 @@ if __name__ == '__main__':
     print('Flaps per second: %f ' % (flap_num/motor_data))
     motor_exit(control[0], control[1])
     data_time,data = convertToForces(data,bias)
-    graphing(data_time,data)
-    printOutCSV(data_time,data,save_file_name)
+    graphing(data_time,data,save_file_name+".png")
+    printOutCSV(data_time,data,save_file_name+".csv")
