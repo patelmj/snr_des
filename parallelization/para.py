@@ -48,7 +48,7 @@ if __name__ == '__main__':
     step_ms=10 #5 is the lowest it will go, keep it at 10ms so that the computer can keep up
     #FIXME add Motor INIT stuff here
     flaps_ps = 4.5
-    flap_num = 1300   #15 flaps is about 2.5 seconds, 150 is about 35 seconds, 1300, 8.5 min
+    flap_num = 150   #15 flaps is about 2.5 seconds, 150 is about 35 seconds, 1300, 8.5 min
     error = 4 # error is 5 seconds since i dont think it would be exactly what the fps is 
     runtime = (1/flaps_ps * flap_num) + error
     control = motor_init(flaps_ps)
