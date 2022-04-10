@@ -36,7 +36,7 @@ Folders
     - w_mass_calibration_step.py - This is a script used for seeing what the transducer sees with the mass of the device ontop of it accounted for. Essentially think of this as zeroing a scale with a beaker on top of it
     - zero_mass_calibration.py - This is a script where the mass of the device ontop of it is not accounted for. This means that you should be seeing the force of gravity on this device.
 - Filtering
-    - filtering.py - here we try to use a bandpass filter on different files in the data folder
+    - filtering.py - here we try to use a bandpass filter on different files in the data folder, then it will rectify the signal and provide average Torque Calculations
 - Motor_control
     - example.py - FIXME
     - function_ns.py - FIXME
@@ -46,4 +46,5 @@ Folders
     - para.py - This is the culmination where the DAQ and motor control work is parallized. This is the main file used for data collection on our wing model system.
 
 # Future Work
-- Potentially change the servo to a 
+- Potentially change the servo to a DC motor to have increased speeds as current flapping is very slow
+- 
