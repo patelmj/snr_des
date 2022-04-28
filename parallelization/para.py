@@ -1,4 +1,4 @@
-#from threading import Thread
+
 from multiprocessing.pool import ThreadPool
 from time import time, sleep
 import sys
@@ -25,12 +25,6 @@ def dataCollection(start,seconds,ms_step):
 def motors(control, flap_num):
     # motor control code runs off number of flaps needed. this can be changed by calculating the numbher of flaps to the number of flaps/ps
     # i should just be able to run the motor code and it should work with timing
-    # while time()-start<seconds: #seconds is the amount of time to run
-    #     ct = (time()-starttime)*1000 #ct is in Milliseconds
-
-
-    # print("Hither I do Fancy Motor Stuffffffff")
-    # sleep((10-((time()-starttime)*1000)%10)/1000)
 
     return motor_main(control[0], control[1], flap_num)
     # this will flap the wing to the specified flap num and flaps ps set in the motor_init
@@ -46,9 +40,8 @@ if __name__ == '__main__':
         save_file_name = "../data/"+save_file_name
     print(save_file_name)
     step_ms=10 #5 is the lowest it will go, keep it at 10ms so that the computer can keep up
-    #FIXME add Motor INIT stuff here
     flaps_ps = 4.5
-    flap_num = 150   #15 flaps is about 2.5 seconds, 150 is about 35 seconds, 1300, 8.5 min
+    flap_num = 15   #15 flaps is about 2.5 seconds, 150 is about 35 seconds, 1300, 8.5 min
     error = 4 # error is 5 seconds since i dont think it would be exactly what the fps is 
     runtime = (1/flaps_ps * flap_num) + error
     control = motor_init(flaps_ps)
@@ -62,7 +55,7 @@ if __name__ == '__main__':
     # runtime = 5 # Ask for runtime in seconds here, currently hard coded to 5
     # look above for runtime calculation
     
-    pool = ThreadPool(processes=2) #FIXME check if it is correct to set it up like this
+    pool = ThreadPool(processes=2)
     starttime = time()
     load_cell_thread = pool.apply_async(dataCollection,(starttime,runtime,step_ms))
     motor_thread = pool.apply_async(motors,(control, flap_num))

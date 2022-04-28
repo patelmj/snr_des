@@ -22,7 +22,7 @@ def plot():
     #data = pd.read_csv("../data/just_motor2.csv")
     #To Cut out 2 thirds of the data to see the middle portion, do the following
     #data = data[1240:2480]
-    data = data[2000:2480]
+    data = data[2200:2480]
 
     raw_data = data[['tz']]
     raw_data = np.array(raw_data)
@@ -64,11 +64,7 @@ def plot():
     axis[2].axhline(y=avg_tz,color='c',label =f"Avg Tz: {avg_tz[0]:0.2f}")
     print(f"Force Avg Tz: {avg_tz}")
 
-    axis[2].legend()
-
-
-
-
+    axis[2].legend(loc="upper right")
     plt.show()
 
 def bandPass(signal):
